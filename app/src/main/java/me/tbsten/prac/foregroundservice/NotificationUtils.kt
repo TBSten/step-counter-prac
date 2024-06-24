@@ -35,7 +35,7 @@ fun Context.createNotificationChannel(
 fun Context.createNotification(
     channelId: String,
     contentTitle: String,
-    contentText: String,
+    contentText: String = "",
     autoCancel: Boolean = false,
     ongoing: Boolean = true,
     @DrawableRes smallIcon: Int = R.mipmap.ic_launcher,
