@@ -14,16 +14,23 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import me.tbsten.prac.foregroundservice.ui.theme.ForegroundServicePracTheme
 
 private val permissionsList = mutableListOf<String>()
@@ -36,10 +43,20 @@ private val permissionsList = mutableListOf<String>()
     }.toList()
 
 class MainActivity : ComponentActivity() {
+    private val stepCounter: StateFlow<Long?> by lazy {
+        stepCounterFlow
+            .stateIn(
+                lifecycleScope,
+                SharingStarted.WhileSubscribed(),
+                null,
+            )
+    }
+
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             val context = LocalContext.current
             ForegroundServicePracTheme {
@@ -59,6 +76,11 @@ class MainActivity : ComponentActivity() {
                             Text("permissions: ${permissionsState.permissions.joinToString(", ") { "${it.permission}:${it.status.isGranted}" }}")
                             Text("allPermissionsGranted: ${permissionsState.allPermissionsGranted}")
                             if (permissionsState.allPermissionsGranted) {
+                                val stepCount by stepCounter.collectAsState()
+                                Text(
+                                    text = if (stepCount != null) "$stepCount 歩" else "データがありません",
+                                    style = MaterialTheme.typography.displayMedium,
+                                )
                                 Button(onClick = context::startMyService) {
                                     Text("Start MyService")
                                 }
