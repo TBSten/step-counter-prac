@@ -69,4 +69,5 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.accompanist.permission)
+    implementation(libs.datastore.preferences)
 }
