@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -22,9 +23,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import me.tbsten.prac.foregroundservice.ui.theme.ForegroundServicePracTheme
 
+private val permissionsList = mutableListOf<String>()
+    .apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        add(Manifest.permission.FOREGROUND_SERVICE_HEALTH)
+        add(Manifest.permission.ACTIVITY_RECOGNITION)
+    }.toList()
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPermissionsApi::class)
@@ -41,21 +50,22 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        val notificationPermission =
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                rememberPermissionState(
-                                    Manifest.permission.POST_NOTIFICATIONS,
-                                )
+                        val permissionsState =
+                            rememberMultiplePermissionsState(
+                                permissionsList,
+                            )
+
+                        Column {
+                            Text("permissions: ${permissionsState.permissions.joinToString(", ") { "${it.permission}:${it.status.isGranted}" }}")
+                            Text("allPermissionsGranted: ${permissionsState.allPermissionsGranted}")
+                            if (permissionsState.allPermissionsGranted) {
+                                Button(onClick = context::startMyService) {
+                                    Text("Start MyService")
+                                }
                             } else {
-                                null
-                            }
-                        if (notificationPermission == null || notificationPermission.status.isGranted) {
-                            Button(onClick = context::startMyService) {
-                                Text("Start MyService")
-                            }
-                        } else {
-                            OutlinedButton(onClick = notificationPermission::launchPermissionRequest) {
-                                Text("Request Permission")
+                                OutlinedButton(onClick = permissionsState::launchMultiplePermissionRequest) {
+                                    Text("Request Permission")
+                                }
                             }
                         }
                     }
