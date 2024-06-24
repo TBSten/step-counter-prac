@@ -42,7 +42,7 @@ class MyService : LifecycleService() {
             this,
             notificationId,
             notification,
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH,
         )
 
         createNotificationChannel(

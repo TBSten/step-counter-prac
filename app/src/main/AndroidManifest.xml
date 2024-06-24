@@ -32,12 +32,8 @@
         <service
             android:name=".MyService"
             android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <!-- specialUseだと必須 -->
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="service_example" />
-        </service>
+            android:foregroundServiceType="health"
+        />
     </application>
 
 </manifest>
